@@ -4,27 +4,78 @@ author: "Curso R de verão 2016"
 date: "18 de janeiro de 2016"
 output: html_document
 ---
+###Exercício do Laboratório  
+Nome: Lorena Guimarães Batista  
+<br>  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+1. Função **moeda** com parâmetro **p** 
+```{r}
+
+moeda <- function(p){
+  x <- runif(1)
+  if(x < p){
+    1
+  } else{
+    0
+  }
+}
+
+```  
+2. Função **moedas** com parâmetros **n** e **p**  
+
+```{r}
+res <- NULL
+
+moedas <- function(n, p){
+    for(i in 1:n){
+      res[i] <- moeda(p)
+    }
+  res
+}
+```  
+3. Função **proporção** com parâmetro **resultados**  
+
+```{r}
+proporcao <- function(resultados){
+  sum(resultados == 1)/length(resultados)
+}
+```  
+4. Função **simulação** com parâmetros **k**, **n** e **p**  
+
+```{r}
+prop <- NULL
+simulacao <- function(k, n, p){
+  for(i in 1:k){
+    resultados <- moedas(n,p)
+    prop[i] <- proporcao(resultados)
+  }
+  prop
+}
+```  
+###Simulação: histogramas  
+(Valor de k fixo em 100)
+<br>  
+
+1. Histogramas para $p=0.25$  
+```{r, fig.height=4, fig.width=6}
+histograma <- function(k, n, p){
+  hist(simulacao(k, n, p), main = paste("HIstograma: Simulação (k = 100, n =",n,"p =",p,")"), xlab = "proporção", breaks=50, col="green")
+}
+
+for(i in c(10, 25, 50, 100, 500)){
+  histograma(100, i, 0.25)
+}
+```  
+2. Histogramas para $p=0.5$  
+```{r, fig.height=4, fig.width=6}
+for(i in c(10, 25, 50, 100, 500)){
+  histograma(100, i, 0.5)
+}
+```  
+3. Histogramas para $p=0.75$  
+```{r, fig.height=4, fig.width=6}
+for(i in c(10, 25, 50, 100, 500)){
+  histograma(100, i, 0.75)
+}
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
