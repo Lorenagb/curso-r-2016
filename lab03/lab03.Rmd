@@ -1,0 +1,97 @@
+---
+title: "Laboratorio 3"
+author: "Curso R de Verão 2016"
+date: "22 de janeiro de 2016"
+output: html_document
+---
+###Relatório  
+<br>  
+
+```{r}
+
+library(nycflights13)
+library(dplyr)
+library(magrittr)
+library(tidyr)
+
+flights <- flights %>% tbl_df
+
+#Vôos de janeiro de 2013
+jan_2013 <- flights %>% filter(month==1) 
+
+#Vôos de janeiro ou fevereiro de 2013
+jan_fev_2013 <- flights %>% filter(month %in% c(1,2))  
+
+#Vôos com distância maior que 1000
+dist_1000 <- flights %>% filter(distance > 1000) 
+
+#Apenas colunas month e dep-delay
+month_delay <- flights %>% select(month, dep_delay)
+
+#Apenas colunas month e dep_delay renomeadas mes e atraso
+mes_atraso <- flights %>% select(mes = month, atraso = dep_delay)
+
+#Sem as colunas tailnum, origin e dest
+sem_tail_ori_dest <- flights %>% select(-c(tailnum, origin, dest))
+
+#Ganho de tempo
+flights %>% mutate(ganho_de_tempo = dep_delay - arr_delay, velocidade = distance / air_time * 60)%>% select(ganho_de_tempo, velocidade)
+
+#Horário de chegada
+flights%>%select(air_time, hour, minute)%>%
+  mutate(minute_total = hour*60 + minute + air_time)%>%
+  mutate(hour2= minute_total%/%60, minute2 = minute_total - (minute_total%/%60)*60)
+  
+#Média da distancia de todos os vôos
+flights %>% summarise(mean(distance))
+
+#Média da distância de todos os vôos por mês
+flights %>% 
+  group_by(month)%>%
+  summarise(mean(distance))
+
+#Média, mediana, primeiro quartil e terceiro quartil do tempo de viagem por mês.
+flights %>% 
+  group_by(month)%>%
+  summarise(media = mean(air_time, na.rm=T), mediana = median(air_time, na.rm=T),
+            pri_quartil = quantile(air_time, 0.25, na.rm=T),
+            sec_quartil = quantile(air_time, 0.75, na.rm=T))
+
+#Dados ordenados em ordem crescente do atraso na partida
+flights %>% arrange(dep_delay)
+
+#Dados ordenados em ordem decrescente do atraso na partida
+flights %>% arrange(desc(dep_delay))
+
+# Tabela: cada linha é um dia e cada coluna é o atraso médio de partida por mês
+flights %>% 
+  group_by(day, month)%>%
+  summarise(media = mean(dep_delay, na.rm=T))%>%
+  spread(month, media)
+
+# Tabela: cada linha é uma hora do dia e cada coluna é o atraso médio por dia 
+flights %>% 
+  group_by(hour, day)%>%
+  summarise(media = mean(dep_delay, na.rm=T))%>%
+  spread(day, media)
+
+#Funçao "gather" nas duas tabelas anteriores
+
+tabela1 <- flights %>% 
+  group_by(day, month)%>%
+  summarise(media = mean(dep_delay, na.rm=T))%>%
+  spread(month, media)%>%
+  gather(month, day)
+
+colnames(tabela1) <- c("day", "mes", "delay")
+tabela1
+
+tabela2 <- flights %>% 
+  group_by(hour, day)%>%
+  summarise(media = mean(dep_delay, na.rm=T))%>%
+  spread(day, media)%>%
+  gather(hour, day)
+
+colnames(tabela2) <- c("hour", "day", "delay")
+tabela2
+```

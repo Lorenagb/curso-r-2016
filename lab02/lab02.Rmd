@@ -1,0 +1,82 @@
+---
+title: "Laboratorio 2"
+author: "Curso R de Verão 2016"
+date: "27 de janeiro de 2016"
+output: html_document
+---
+
+###Relatório  
+<br>  
+
+1. Leitura dos dados dos arquivos no Dropbox:  
+
+```{r}
+library(magrittr)
+library(dplyr)
+
+setwd("C:\\Users\\Lorena\\Documents\\curso-r-2016")
+
+pnud_csv <- read.table("pnud2_win.csv", dec=",", sep = ";", header = T, stringsAsFactors = F)
+summary(pnud_csv[,1:10])
+
+pnud_txt <- read.table("pnud_win.txt", dec=".", sep = " ", header = T, stringsAsFactors = F)
+summary(pnud_txt[,1:10])
+
+library(readxl)
+
+pnud_xlsx <- read_excel("pnud_win.xlsx")
+summary(pnud_xlsx[,1:10])  
+
+load("C:\\Users\\Lorena\\Downloads\\pnud.rda")
+pnud_rda <- d
+summary(pnud_rda[,1:10])
+
+pnud_rds <- readRDS("pnud.rds")
+summary(pnud_rds[,1:10])
+
+library(RSQLite)
+pnud_sqlite <- src_sqlite("pnud.sqlite")%>%tbl("pnud")%>%as.data.frame() 
+```  
+<br>  
+2. Descritiva básica:
+```{r}
+link_pnud <- 'https://www.dropbox.com/s/seqctcl46qeemgu/pnud_simplificado.rds?dl=1'
+tmp <- tempfile()
+httr::GET(link_pnud, httr::write_disk(tmp))
+pnud <- readRDS(tmp)
+file.remove(tmp)
+
+# MUNICIPIOS COM MAIOR IDH EM 2010
+
+maior_idh <- pnud %>%
+  filter(ano == 2010)%>%
+  arrange(desc(idhm))%>%
+  select(municipio)
+  
+maior_idh[1:10,]
+
+# UF COM MENOR EXPECTATIVA DE VIDA MEDIA PONDERADA PELA POP DOS MUNICIPIOS EM 2010
+
+menor_exp <- pnud %>%
+  filter(ano == 2000)%>%
+  mutate(media_pond = (espvida * pesotot)/sum(pesotot))%>%
+  group_by(ufn)%>%
+  summarise(med_espvida = mean(media_pond))%>%
+  arrange(med_espvida)
+
+menor_exp[1,]
+
+
+# MUNICIPIOS OUTLIERS COM RELAÇÃO AO INDICE DE GINI
+outliers <- pnud %>%
+  select(municipio, ano, gini)%>%
+  filter(ano == 1991)%>%
+  mutate(media = mean(gini), dp = sd(gini))%>%
+  mutate(out = gini - (media + 2*dp))%>%
+  filter(out > 0)%>%
+  select(municipio)
+
+outliers
+
+```
+
